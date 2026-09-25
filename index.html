@@ -1,273 +1,677 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" class="scroll-smooth">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tecnoservtech — Serviços de TI e Cibersegurança em Fortaleza</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tecnoservtech — Serviços de TI em Fortaleza</title>
+  <meta name="description" content="Infraestrutura, MikroTik, pfSense, Windows Server, backup e suporte de TI para pequenas e médias empresas em Fortaleza, CE." />
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300..800;1,300..800&family=Share+Tech+Mono&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind Configuration -->
   <script>
     tailwind.config = {
       theme: {
         extend: {
           colors: {
-            brand: '#00ff66',
-            darkbg: '#0a0d0f',
-            cardbg: 'rgba(15, 23, 42, 0.75)',
-            alertred: '#ff4444',
-            warningyellow: '#ffbb00'
+            background: '#07090e',
+            foreground: '#e2e8f0',
+            brand: {
+              DEFAULT: '#00f0ff',
+              glow: '#00f0ff88',
+              accent: '#00ff9d',
+              dark: '#008b99',
+            },
+            surface: {
+              DEFAULT: 'rgba(15, 23, 42, 0.65)',
+              border: 'rgba(0, 240, 255, 0.2)',
+              hover: 'rgba(0, 240, 255, 0.12)',
+            },
+            status: {
+              progress: '#f59e0b',
+              scheduled: '#38bdf8',
+              done: '#10b981',
+            }
           },
           fontFamily: {
+            sans: ['Inter', 'sans-serif'],
             mono: ['JetBrains Mono', 'monospace'],
-            display: ['Share Tech Mono', 'monospace']
+            display: ['Share Tech Mono', 'monospace'],
+          },
+          boxShadow: {
+            'neon': '0 0 20px rgba(0, 240, 255, 0.25), inset 0 0 10px rgba(0, 240, 255, 0.1)',
+            'neon-green': '0 0 20px rgba(0, 255, 157, 0.25)',
           }
         }
       }
     }
   </script>
+
+  <!-- Custom Styles (Mesh, Scanlines, Glassmorphism, Animations) -->
   <style>
-    body { background-color: #0a0d0f; color: #e2e8f0; font-family: 'JetBrains Mono', monospace; }
-    .glow-text { text-shadow: 0 0 10px rgba(0, 255, 102, 0.5); }
-    .glass { background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(12px); border: 1px solid rgba(0, 255, 102, 0.2); }
+    body {
+      background-color: #07090e;
+      color: #e2e8f0;
+      font-family: 'Inter', sans-serif;
+      overflow-x: hidden;
+    }
+
+    /* Cyber grid overlay */
+    .bg-grid {
+      background-size: 40px 40px;
+      background-image: 
+        linear-gradient(to right, rgba(0, 240, 255, 0.04) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(0, 240, 255, 0.04) 1px, transparent 1px);
+    }
+
+    /* CRT Scanlines Effect */
+    .scanlines {
+      background: linear-gradient(
+        to bottom,
+        rgba(255,255,255,0),
+        rgba(255,255,255,0) 50%,
+        rgba(0, 0, 0, 0.35) 50%,
+        rgba(0, 0, 0, 0.35)
+      );
+      background-size: 100% 4px;
+    }
+
+    /* Glassmorphism elements */
+    .glass {
+      background: rgba(11, 17, 32, 0.7);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+
+    .glass-strong {
+      background: rgba(6, 11, 24, 0.88);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+    }
+
+    /* Text Glow Effects */
+    .glow-text {
+      text-shadow: 0 0 12px rgba(0, 240, 255, 0.6);
+    }
+
+    .glow-text-green {
+      text-shadow: 0 0 12px rgba(0, 255, 157, 0.6);
+    }
+
+    /* Matrix matrix canvas fallback styling */
+    canvas#bg-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #07090e;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1e293b;
+      border-radius: 4px;
+      border: 1px solid rgba(0, 240, 255, 0.2);
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #00f0ff;
+    }
   </style>
 </head>
-<body class="antialiased selection:bg-brand selection:text-black">
+<body class="relative min-h-screen bg-background font-sans antialiased text-foreground">
 
-  <!-- Header -->
-  <header class="sticky top-0 z-50 glass border-b border-brand/20">
-    <div class="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
-      <a href="#" class="font-display text-lg tracking-tight">
-        <span class="glow-text text-brand"><span class="text-white/60">root@</span>Tecnoserv</span><span class="text-white/50">Tech</span><span class="animate-pulse text-brand">_</span>
-      </a>
-      <nav class="hidden md:flex items-center gap-6 text-sm text-white/70">
-        <a href="#servicos" class="hover:text-brand transition-colors">./servicos</a>
-        <a href="#seguranca" class="hover:text-brand transition-colors text-brand font-semibold">./seguranca_alertas</a>
-        <a href="#sobre" class="hover:text-brand transition-colors">./sobre</a>
-        <a href="#contato" class="hover:text-brand transition-colors">./contato</a>
-      </nav>
-      <a href="https://wa.me/5585988649731" target="_blank" class="rounded bg-brand px-4 py-2 text-sm font-semibold text-black hover:bg-brand/80 transition-colors">Orçamento</a>
-    </div>
-  </header>
+  <!-- Animated Matrix/Nodes Canvas -->
+  <canvas id="bg-canvas" class="opacity-25"></canvas>
+  
+  <!-- CRT Scanlines & Cyber Grid Overlay -->
+  <div class="bg-grid pointer-events-none fixed inset-0 z-[1] opacity-70"></div>
+  <div class="scanlines pointer-events-none fixed inset-0 z-[2] opacity-40"></div>
 
-  <!-- Hero Section -->
-  <section class="mx-auto max-w-6xl px-6 pt-16 pb-12 text-center md:text-left">
-    <span class="inline-block rounded border border-brand/30 bg-brand/10 px-3 py-1 text-xs font-semibold text-brand tracking-widest uppercase">&gt; suporte_e_seguranca_pme</span>
-    <h1 class="mt-4 font-display text-4xl md:text-6xl font-bold">Tecnologia e <span class="glow-text text-brand">Cibersegurança</span> para proteger sua empresa.</h1>
-    <p class="mt-4 max-w-2xl text-white/70 leading-relaxed">
-      Infraestrutura de redes, MikroTik, pfSense, backup automatizado e monitoramento contra ameaças cibernéticas em Fortaleza, CE.
-    </p>
-    <div class="mt-8 flex flex-wrap gap-4 justify-center md:justify-start">
-      <a href="https://wa.me/5585988649731" target="_blank" class="rounded bg-brand px-6 py-3 text-sm font-semibold text-black hover:bg-brand/85 transition-colors">Falar no WhatsApp</a>
-      <a href="#seguranca" class="rounded border border-brand/40 bg-brand/5 px-6 py-3 text-sm font-semibold text-brand hover:bg-brand/15 transition-colors">Central de Alertas</a>
-    </div>
-  </section>
+  <!-- Main Content Wrapper -->
+  <div class="relative z-10 flex flex-col min-h-screen">
 
-  <!-- SEÇÃO DE SERVIÇOS -->
-  <section id="servicos" class="mx-auto max-w-6xl px-6 py-12">
-    <h2 class="font-display text-3xl font-bold tracking-tight text-white mb-8"><span class="text-brand">&gt;</span> Nossos Serviços</h2>
-    <div class="grid gap-6 md:grid-cols-3">
-      <div class="glass rounded-xl p-6 border border-brand/20">
-        <h3 class="font-display text-lg text-brand font-bold mb-2">[01] MikroTik</h3>
-        <p class="text-xs text-white/70 leading-relaxed">Roteadores, switches e VLANs configurados para máxima estabilidade e controle de banda.</p>
-      </div>
-      <div class="glass rounded-xl p-6 border border-brand/20">
-        <h3 class="font-display text-lg text-brand font-bold mb-2">[02] pfSense</h3>
-        <p class="text-xs text-white/70 leading-relaxed">Firewall, VPN e controle de acesso com regras claras e monitoramento de tráfego.</p>
-      </div>
-      <div class="glass rounded-xl p-6 border border-brand/20">
-        <h3 class="font-display text-lg text-brand font-bold mb-2">[03] Windows Server</h3>
-        <p class="text-xs text-white/70 leading-relaxed">Active Directory, GPOs e servidores de arquivos para organização e controle de permissões.</p>
-      </div>
-      <div class="glass rounded-xl p-6 border border-brand/20">
-        <h3 class="font-display text-lg text-brand font-bold mb-2">[04] Infraestrutura</h3>
-        <p class="text-xs text-white/70 leading-relaxed">Cabeamento estruturado, organização de racks e instalação de redes corporativas.</p>
-      </div>
-      <div class="glass rounded-xl p-6 border border-brand/20">
-        <h3 class="font-display text-lg text-brand font-bold mb-2">[05] Backup Seguro</h3>
-        <p class="text-xs text-white/70 leading-relaxed">Rotinas automatizadas locais e em nuvem com rotinas de teste de restauração.</p>
-      </div>
-      <div class="glass rounded-xl p-6 border border-brand/20">
-        <h3 class="font-display text-lg text-brand font-bold mb-2">[06] Suporte Especializado</h3>
-        <p class="text-xs text-white/70 leading-relaxed">Atendimento remoto e presencial em Fortaleza diretamente com quem resolve.</p>
-      </div>
-    </div>
-  </section>
+    <!-- Navigation Header -->
+    <header class="sticky top-0 z-50 border-b border-brand-dark/30 glass-strong">
+      <div class="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
+        
+        <!-- Brand Logo -->
+        <a href="#" class="font-display text-lg sm:text-xl tracking-tight transition-transform hover:scale-105">
+          <span class="text-slate-400">root@</span><span class="text-brand glow-text font-bold">Tecnoserv</span><span class="text-white">Tech</span><span class="animate-pulse text-brand font-bold">_</span>
+        </a>
 
-  <!-- CENTRAL DE SEGURANÇA, DICAS E ALERTAS -->
-  <section id="seguranca" class="mx-auto max-w-6xl px-6 py-12">
-    <div class="flex flex-col md:flex-row items-start md:items-end justify-between mb-8 gap-4 border-b border-brand/20 pb-4">
-      <div>
-        <h2 class="font-display text-3xl font-bold tracking-tight text-white flex items-center gap-2">
-          <span class="text-brand">&gt;</span> Central de Alertas &amp; Cibersegurança
-        </h2>
-        <p class="text-sm text-white/60 mt-1">Fique atento aos novos golpes e proteja a infraestrutura da sua empresa.</p>
-      </div>
-      <!-- Filtros -->
-      <div class="flex flex-wrap gap-2 text-xs">
-        <button onclick="filterCards('all')" class="px-3 py-1.5 rounded bg-brand text-black font-semibold hover:opacity-90">Todos</button>
-        <button onclick="filterCards('alerta')" class="px-3 py-1.5 rounded border border-alertred/50 text-alertred hover:bg-alertred/10">Alertas de Golpes</button>
-        <button onclick="filterCards('dica')" class="px-3 py-1.5 rounded border border-brand/50 text-brand hover:bg-brand/10">Dicas de Proteção</button>
-        <button onclick="filterCards('noticia')" class="px-3 py-1.5 rounded border border-sky-400/50 text-sky-400 hover:bg-sky-400/10">Notícias Externas</button>
-      </div>
-    </div>
+        <!-- Desktop Navigation -->
+        <nav class="hidden items-center gap-8 text-sm font-mono text-slate-300 md:flex">
+          <a href="#servicos" class="transition-colors hover:text-brand hover:glow-text">./servicos</a>
+          <a href="#sobre" class="transition-colors hover:text-brand hover:glow-text">./sobre</a>
+          <a href="#contato" class="transition-colors hover:text-brand hover:glow-text">./contato</a>
+        </nav>
 
-    <!-- Grid de Cards de Segurança -->
-    <div class="grid gap-6 md:grid-cols-3">
+        <!-- CTA & Mobile Toggle -->
+        <div class="flex items-center gap-3">
+          <a href="#contato" class="hidden sm:inline-flex rounded-md bg-brand/10 border border-brand/50 px-4 py-2 text-xs sm:text-sm font-mono font-semibold text-brand shadow-neon transition-all hover:bg-brand hover:text-black">
+            &gt; Orçamento
+          </a>
+          <a href="https://wa.me/5585988649731" target="_blank" rel="noopener noreferrer" class="rounded-md bg-emerald-500/20 border border-emerald-500/50 px-3 py-2 text-xs font-mono font-semibold text-emerald-400 hover:bg-emerald-500 hover:text-black transition-all flex items-center gap-1.5">
+            <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.705 1.754zm6.097-4.137l.437.26c1.558.925 3.344 1.413 5.176 1.414 5.44 0 9.866-4.426 9.868-9.868.001-2.636-1.025-5.112-2.899-6.988-1.874-1.874-4.35-2.899-6.988-2.899-5.441 0-9.868 4.426-9.868 9.868 0 1.91.545 3.76 1.577 5.367l.285.444-1.042 3.809 3.905-1.023z"/></svg>
+            <span class="hidden sm:inline">WhatsApp</span>
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="mx-auto grid max-w-6xl items-center gap-12 px-4 sm:px-6 pt-16 pb-20 lg:grid-cols-2 lg:pt-24">
       
-      <!-- Card 1: Alerta Golpe -->
-      <div class="card-item alerta glass rounded-xl p-6 border-l-4 border-l-alertred hover:border-brand/40 transition-all">
-        <div class="flex items-center justify-between text-xs text-alertred font-semibold mb-2">
-          <span>⚠️ ALERTA DE GOLPE</span>
-          <span>Recente</span>
-        </div>
-        <h3 class="font-display text-lg font-bold text-white mb-2">Falso Boleto e Phishing via Pix</h3>
-        <p class="text-xs text-white/70 leading-relaxed mb-4">
-          Notificações falsas por e-mail e WhatsApp se passando por fornecedores de TI e bancos solicitando pagamento urgente.
+      <!-- Hero Left: Text & CTAs -->
+      <div>
+        <span class="inline-flex items-center gap-2 rounded-md border border-brand/30 bg-brand/10 px-3 py-1 font-mono text-xs font-semibold tracking-wider text-brand uppercase shadow-inner">
+          <span class="w-2 h-2 rounded-full bg-brand animate-ping"></span> &gt; suporte_para_pmes
+        </span>
+
+        <h1 class="mt-6 font-display text-4xl sm:text-5xl lg:text-6xl font-bold leading-[1.1] tracking-tight text-white">
+          Tecnologia que <span class="glow-text text-brand">resolve</span> o dia a dia da sua empresa<span class="text-brand">.</span>
+        </h1>
+
+        <p class="mt-6 max-w-lg text-base leading-relaxed text-slate-300">
+          Infraestrutura, MikroTik, pfSense, Windows Server e segurança da informação — com <strong>15+ anos de estrada</strong> e resposta rápida quando você mais precisa.
         </p>
-        <button onclick="openModal('Phishing via Pix e Falso Boleto', 'Oriente sua equipe financeira a sempre confirmar a chave Pix ou código de barras diretamente com o fornecedor por telefone antes de transferir. Em caso de dúvidas, fale com a Tecnoservtech.')" class="text-xs font-semibold text-brand hover:underline">
-          Ler Alerta Completo &rarr;
-        </button>
-      </div>
 
-      <!-- Card 2: Dica de Proteção -->
-      <div class="card-item dica glass rounded-xl p-6 border-l-4 border-l-brand hover:border-brand/40 transition-all">
-        <div class="flex items-center justify-between text-xs text-brand font-semibold mb-2">
-          <span>🛡️ DICA PRÁTICA</span>
-          <span>Essencial</span>
+        <!-- CTA Action Buttons -->
+        <div class="mt-8 flex flex-wrap gap-4">
+          <a href="https://wa.me/5585988649731" target="_blank" rel="noreferrer" class="group flex items-center gap-2 rounded-md bg-emerald-500 px-6 py-3.5 font-mono text-sm font-semibold text-slate-950 shadow-neon-green transition-all hover:bg-emerald-400 hover:scale-[1.02]">
+            <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.705 1.754zm6.097-4.137l.437.26c1.558.925 3.344 1.413 5.176 1.414 5.44 0 9.866-4.426 9.868-9.868.001-2.636-1.025-5.112-2.899-6.988-1.874-1.874-4.35-2.899-6.988-2.899-5.441 0-9.868 4.426-9.868 9.868 0 1.91.545 3.76 1.577 5.367l.285.444-1.042 3.809 3.905-1.023z"/></svg>
+            Falar no WhatsApp
+          </a>
+
+          <a href="#servicos" class="rounded-md border border-brand/40 bg-brand/5 px-6 py-3.5 font-mono text-sm font-semibold text-brand transition-all hover:bg-brand/15 hover:border-brand">
+            Ver serviços &gt;
+          </a>
         </div>
-        <h3 class="font-display text-lg font-bold text-white mb-2">Autenticação em Dois Fatores (MFA)</h3>
-        <p class="text-xs text-white/70 leading-relaxed mb-4">
-          Ativar o MFA no e-mail corporativo (Zimbra, Google Workspace, Outlook) bloqueia ataques automatizados de roubo de senha.
-        </p>
-        <button onclick="openModal('Implementação de MFA', 'Recomendamos usar aplicativos autenticadores (Google Authenticator / Microsoft Authenticator) em vez de SMS, prevenindo ataques do tipo SIM Swap.')" class="text-xs font-semibold text-brand hover:underline">
-          Ver Passo a Passo &rarr;
-        </button>
       </div>
 
-      <!-- Card 3: Notícia Externa -->
-      <div class="card-item noticia glass rounded-xl p-6 border-l-4 border-l-sky-400 hover:border-brand/40 transition-all">
-        <div class="flex items-center justify-between text-xs text-sky-400 font-semibold mb-2">
-          <span>🌐 CERT.BR</span>
-          <span>Fonte Oficial</span>
+      <!-- Hero Right: Interactive Live Terminal Widget -->
+      <div class="relative w-full">
+        <div class="glass rounded-xl border border-brand/30 font-mono shadow-2xl shadow-brand/10 overflow-hidden">
+          
+          <!-- Terminal Header -->
+          <div class="flex items-center justify-between border-b border-brand/20 bg-slate-950/80 px-4 py-3">
+            <div class="flex items-center gap-2">
+              <span class="h-3 w-3 rounded-full bg-red-500/80 inline-block"></span>
+              <span class="h-3 w-3 rounded-full bg-yellow-500/80 inline-block"></span>
+              <span class="h-3 w-3 rounded-full bg-green-500/80 inline-block"></span>
+            </div>
+            <span class="text-xs tracking-wider text-slate-400">tecnoserv@suporte:~</span>
+            <span class="text-xs text-brand font-mono">v2.6.0</span>
+          </div>
+
+          <!-- Terminal Body / Content -->
+          <div class="space-y-3.5 p-5 text-sm">
+            <p class="text-xs text-slate-400 flex items-center gap-1.5">
+              <span class="text-brand font-bold">$</span> 
+              <span>./status --chamados</span>
+            </p>
+
+            <!-- Ticket 1 -->
+            <div class="glass-strong flex items-center justify-between rounded-lg border border-brand/20 px-4 py-3 transition-transform hover:translate-x-1">
+              <p class="text-sm">
+                <span class="text-brand font-bold">#2048</span> 
+                <span class="text-slate-300 ml-1">backup-nuvem</span>
+              </p>
+              <span class="text-xs font-semibold text-amber-400 bg-amber-400/10 px-2.5 py-1 rounded border border-amber-400/30">
+                [EM ANDAMENTO]
+              </span>
+            </div>
+
+            <!-- Ticket 2 -->
+            <div class="glass-strong flex items-center justify-between rounded-lg border border-brand/20 px-4 py-3 transition-transform hover:translate-x-1">
+              <p class="text-sm">
+                <span class="text-brand font-bold">#2051</span> 
+                <span class="text-slate-300 ml-1">manutencao-rede</span>
+              </p>
+              <span class="text-xs font-semibold text-sky-400 bg-sky-400/10 px-2.5 py-1 rounded border border-sky-400/30">
+                [AGENDADO]
+              </span>
+            </div>
+
+            <!-- Ticket 3 -->
+            <div class="glass-strong flex items-center justify-between rounded-lg border border-brand/20 px-4 py-3 transition-transform hover:translate-x-1">
+              <p class="text-sm">
+                <span class="text-brand font-bold">#2055</span> 
+                <span class="text-slate-300 ml-1">troca-equipamento</span>
+              </p>
+              <span class="text-xs font-semibold text-emerald-400 bg-emerald-400/10 px-2.5 py-1 rounded border border-emerald-400/30">
+                [CONCLUÍDO]
+              </span>
+            </div>
+
+            <!-- Response SLA Footer -->
+            <div class="pt-2 border-t border-slate-800/80 flex justify-between items-center text-xs text-slate-400">
+              <p><span class="text-brand">$</span> resposta em até <span class="text-brand font-bold">24h</span><span class="animate-pulse text-brand font-bold">▊</span></p>
+              <span class="text-slate-500">Fortaleza / CE</span>
+            </div>
+          </div>
         </div>
-        <h3 class="font-display text-lg font-bold text-white mb-2">Estatísticas de Incidentes</h3>
-        <p class="text-xs text-white/70 leading-relaxed mb-4">
-          Relatórios oficiais sobre incidentes cibernéticos, varreduras de rede e vazamentos de dados no Brasil.
-        </p>
-        <a href="https://www.cert.br/stats/incidentes/" target="_blank" rel="noopener noreferrer" class="text-xs font-semibold text-sky-400 hover:underline flex items-center gap-1">
-          Acessar CERT.br ↗
-        </a>
       </div>
 
-      <!-- Card 4: Alerta Ransomware -->
-      <div class="card-item alerta glass rounded-xl p-6 border-l-4 border-l-alertred hover:border-brand/40 transition-all">
-        <div class="flex items-center justify-between text-xs text-alertred font-semibold mb-2">
-          <span>⚠️ AMEAÇA RANSOMWARE</span>
-          <span>Crítico</span>
+    </section>
+
+    <!-- Services Section -->
+    <section id="servicos" class="mx-auto max-w-6xl px-4 sm:px-6 py-20">
+      
+      <!-- Section Header -->
+      <div class="mb-12 flex flex-col sm:flex-row sm:items-end justify-between border-b border-brand/20 pb-4">
+        <div>
+          <span class="text-xs font-mono text-brand uppercase tracking-widest">// Soluções corporativas</span>
+          <h2 class="mt-1 font-display text-3xl sm:text-4xl font-bold tracking-tight text-white">
+            <span class="text-brand">&gt;</span> Nossos Serviços
+          </h2>
         </div>
-        <h3 class="font-display text-lg font-bold text-white mb-2">Ataques a Servidores RDP Expostos</h3>
-        <p class="text-xs text-white/70 leading-relaxed mb-4">
-          Portas RDP (3389) abertas para a internet são o principal ponto de entrada de hackers para criptografar servidores.
+        <p class="text-sm font-mono text-slate-400 mt-2 sm:mt-0">
+          Infraestrutura e suporte sob medida para PMEs
         </p>
-        <button onclick="openModal('Proteção contra Ransomware RDP', 'A Tecnoservtech recomenda fechar conexões RDP diretas e implementar VPN segura com pfSense ou MikroTik com autenticação forte.')" class="text-xs font-semibold text-brand hover:underline">
-          Como Proteger &rarr;
-        </button>
       </div>
 
-      <!-- Card 5: Dica Backup -->
-      <div class="card-item dica glass rounded-xl p-6 border-l-4 border-l-brand hover:border-brand/40 transition-all">
-        <div class="flex items-center justify-between text-xs text-brand font-semibold mb-2">
-          <span>💾 REGRA 3-2-1</span>
-          <span>Backup Seguro</span>
+      <!-- Services Grid (6 Cards) -->
+      <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        
+        <!-- Service 01: MikroTik -->
+        <div class="glass group relative rounded-xl border border-brand/20 p-6 shadow-xl transition-all duration-300 hover:-translate-y-1 hover:border-brand/60 hover:shadow-neon">
+          <div class="flex items-center justify-between">
+            <span class="font-display text-sm font-bold text-brand/80">[01]</span>
+            <div class="p-2 rounded bg-brand/10 text-brand">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.14 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0"/></svg>
+            </div>
+          </div>
+          <h3 class="mt-4 font-display text-xl font-bold text-white group-hover:text-brand transition-colors">MikroTik</h3>
+          <p class="mt-3 text-sm leading-relaxed text-slate-300">
+            Roteadores, switches e VLANs configurados para máxima estabilidade, failover de links e controle rigoroso de banda.
+          </p>
         </div>
-        <h3 class="font-display text-lg font-bold text-white mb-2">Estratégia de Backup Imutável</h3>
-        <p class="text-xs text-white/70 leading-relaxed mb-4">
-          Mantenha cópias isoladas para garantir que, caso a rede seja infectada, o backup não seja corrompido.
-        </p>
-        <button onclick="openModal('Regra de Backup 3-2-1', 'Apenas salvar em HD externo não é suficiente. É preciso ter cópias offline ou em nuvem criptografada com rotinas periódicas de teste de restauração.')" class="text-xs font-semibold text-brand hover:underline">
-          Entender Estratégia &rarr;
-        </button>
-      </div>
 
-      <!-- Card 6: Portal de Notícias -->
-      <div class="card-item noticia glass rounded-xl p-6 border-l-4 border-l-sky-400 hover:border-brand/40 transition-all">
-        <div class="flex items-center justify-between text-xs text-sky-400 font-semibold mb-2">
-          <span>📰 TECMUNDO SEGURANÇA</span>
-          <span>Notícias</span>
+        <!-- Service 02: pfSense -->
+        <div class="glass group relative rounded-xl border border-brand/20 p-6 shadow-xl transition-all duration-300 hover:-translate-y-1 hover:border-brand/60 hover:shadow-neon">
+          <div class="flex items-center justify-between">
+            <span class="font-display text-sm font-bold text-brand/80">[02]</span>
+            <div class="p-2 rounded bg-brand/10 text-brand">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+            </div>
+          </div>
+          <h3 class="mt-4 font-display text-xl font-bold text-white group-hover:text-brand transition-colors">pfSense</h3>
+          <p class="mt-3 text-sm leading-relaxed text-slate-300">
+            Firewall robusto, VPN segura para acesso remoto e controle de navegação com logs detalhados e prevenção de intrusões.
+          </p>
         </div>
-        <h3 class="font-display text-lg font-bold text-white mb-2">Notícias Globais de Cibersegurança</h3>
-        <p class="text-xs text-white/70 leading-relaxed mb-4">
-          Acompanhe correções urgentes de segurança no Windows, Linux e novos relatórios sobre ameaças digitais.
-        </p>
-        <a href="https://www.tecmundo.com.br/seguranca" target="_blank" rel="noopener noreferrer" class="text-xs font-semibold text-sky-400 hover:underline flex items-center gap-1">
-          Ir para TecMundo ↗
-        </a>
-      </div>
 
-    </div>
-  </section>
+        <!-- Service 03: Windows Server -->
+        <div class="glass group relative rounded-xl border border-brand/20 p-6 shadow-xl transition-all duration-300 hover:-translate-y-1 hover:border-brand/60 hover:shadow-neon">
+          <div class="flex items-center justify-between">
+            <span class="font-display text-sm font-bold text-brand/80">[03]</span>
+            <div class="p-2 rounded bg-brand/10 text-brand">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01"/></svg>
+            </div>
+          </div>
+          <h3 class="mt-4 font-display text-xl font-bold text-white group-hover:text-brand transition-colors">Windows Server</h3>
+          <p class="mt-3 text-sm leading-relaxed text-slate-300">
+            Active Directory (AD), GPOs, servidor de arquivos e permissões organizadas para padronizar e proteger a rede corporativa.
+          </p>
+        </div>
 
-  <!-- CONTATO -->
-  <section id="contato" class="mx-auto max-w-6xl px-6 py-12">
-    <div class="glass rounded-xl p-8 border border-brand/20">
-      <h2 class="font-display text-2xl font-bold text-white mb-4"><span class="text-brand">&gt;</span> Fale com a Tecnoservtech</h2>
-      <p class="text-xs text-white/70 mb-6">Atendimento direto para empresas em Fortaleza e região metropolitana.</p>
-      <div class="flex flex-col md:flex-row gap-6">
-        <a href="https://wa.me/5585988649731" target="_blank" class="flex items-center gap-3 bg-brand/10 border border-brand/30 p-4 rounded-lg text-brand font-semibold text-sm hover:bg-brand/20 transition-colors">
-          <span>📲 WhatsApp: (85) 98864-9731</span>
-        </a>
-        <a href="mailto:juliocesarvieirarocha@gmail.com" class="flex items-center gap-3 bg-white/5 border border-white/20 p-4 rounded-lg text-white font-semibold text-sm hover:bg-white/10 transition-colors">
-          <span>✉️ E-mail: juliocesarvieirarocha@gmail.com</span>
-        </a>
-      </div>
-    </div>
-  </section>
+        <!-- Service 04: Infraestrutura -->
+        <div class="glass group relative rounded-xl border border-brand/20 p-6 shadow-xl transition-all duration-300 hover:-translate-y-1 hover:border-brand/60 hover:shadow-neon">
+          <div class="flex items-center justify-between">
+            <span class="font-display text-sm font-bold text-brand/80">[04]</span>
+            <div class="p-2 rounded bg-brand/10 text-brand">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+            </div>
+          </div>
+          <h3 class="mt-4 font-display text-xl font-bold text-white group-hover:text-brand transition-colors">Infraestrutura</h3>
+          <p class="mt-3 text-sm leading-relaxed text-slate-300">
+            Cabeamento estruturado Cat6, organização de rack de telecomunicações e implantação de redes Wi-Fi sem pontos cegos.
+          </p>
+        </div>
 
-  <!-- Modal de Detalhes -->
-  <div id="modal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="glass max-w-lg w-full rounded-xl p-6 border border-brand/30 shadow-2xl relative">
-      <h3 id="modal-title" class="font-display text-xl font-bold text-brand mb-3"></h3>
-      <p id="modal-body" class="text-xs text-white/80 leading-relaxed mb-6"></p>
-      <div class="flex justify-end gap-3">
-        <button onclick="closeModal()" class="px-4 py-2 rounded bg-brand/20 text-brand border border-brand/30 text-xs font-semibold hover:bg-brand/30">
-          Fechar [ESC]
-        </button>
+        <!-- Service 05: Backup -->
+        <div class="glass group relative rounded-xl border border-brand/20 p-6 shadow-xl transition-all duration-300 hover:-translate-y-1 hover:border-brand/60 hover:shadow-neon">
+          <div class="flex items-center justify-between">
+            <span class="font-display text-sm font-bold text-brand/80">[05]</span>
+            <div class="p-2 rounded bg-brand/10 text-brand">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"/></svg>
+            </div>
+          </div>
+          <h3 class="mt-4 font-display text-xl font-bold text-white group-hover:text-brand transition-colors">Backup Corporativo</h3>
+          <p class="mt-3 text-sm leading-relaxed text-slate-300">
+            Rotinas automatizadas locais e em nuvem com testes frequentes de restauração — porque backup não testado é ilusão.
+          </p>
+        </div>
+
+        <!-- Service 06: Suporte Técnico -->
+        <div class="glass group relative rounded-xl border border-brand/20 p-6 shadow-xl transition-all duration-300 hover:-translate-y-1 hover:border-brand/60 hover:shadow-neon">
+          <div class="flex items-center justify-between">
+            <span class="font-display text-sm font-bold text-brand/80">[06]</span>
+            <div class="p-2 rounded bg-brand/10 text-brand">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+            </div>
+          </div>
+          <h3 class="mt-4 font-display text-xl font-bold text-white group-hover:text-brand transition-colors">Suporte Especializado</h3>
+          <p class="mt-3 text-sm leading-relaxed text-slate-300">
+            Atendimento remoto imediato e presencial em Fortaleza e região. Atendimento direto com especialistas sem robôs.
+          </p>
+        </div>
+
       </div>
-    </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="sobre" class="mx-auto max-w-6xl px-4 sm:px-6 py-20">
+      <div class="glass grid items-center gap-10 rounded-2xl border border-brand/20 p-8 sm:p-12 shadow-2xl lg:grid-cols-2">
+        
+        <!-- Text Info -->
+        <div>
+          <span class="text-xs font-mono text-brand uppercase tracking-widest">// Quem somos</span>
+          <h2 class="mt-2 font-display text-3xl sm:text-4xl font-bold tracking-tight text-white">
+            <span class="text-brand">&gt;</span> Sobre a TecnoservTech
+          </h2>
+          
+          <p class="mt-5 leading-relaxed text-slate-300">
+            Mais de <strong>15 anos cuidando da TI</strong> de empresas em Fortaleza com máxima proximidade, transparência e agilidade. Do cabeamento estruturado ao servidor principal, você fala diretamente com quem planeja e executa.
+          </p>
+          
+          <p class="mt-4 leading-relaxed text-slate-300">
+            Sem filas de espera de call center, sem burocracia e sem jargões técnicos desnecessários. Transparência total do primeiro chamado à solução.
+          </p>
+
+          <!-- Key Metrics -->
+          <div class="mt-8 grid grid-cols-2 gap-6 border-t border-slate-800 pt-6">
+            <div>
+              <p class="font-display text-3xl font-bold text-brand glow-text">15+</p>
+              <p class="mt-1 text-xs font-mono text-slate-400 uppercase tracking-wider">Anos de experiência</p>
+            </div>
+            <div>
+              <p class="font-display text-3xl font-bold text-brand glow-text">24h</p>
+              <p class="mt-1 text-xs font-mono text-slate-400 uppercase tracking-wider">Tempo max. de resposta</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Visual / Graphic Card Showcase -->
+        <div class="relative overflow-hidden rounded-xl border border-brand/30 bg-slate-950 p-6">
+          <div class="absolute -top-12 -right-12 w-48 h-48 bg-brand/10 rounded-full blur-2xl"></div>
+          
+          <!-- Terminal Graphic Mockup -->
+          <div class="relative z-10 space-y-4 font-mono text-xs text-slate-300">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+              <span class="text-emerald-400">● SYSTEM HEALTH: OPTIMAL</span>
+              <span class="text-slate-500">FORTALEZA_NODE_01</span>
+            </div>
+            
+            <div class="space-y-2 text-slate-400">
+              <p><span class="text-brand">&gt; uptime</span>: 99.98% (últimos 365 dias)</p>
+              <p><span class="text-brand">&gt; firewall</span>: pfSense ACTIVE [0 ameaças detectadas]</p>
+              <p><span class="text-brand">&gt; backup</span>: SYNCHRONIZED (Local + Cloud)</p>
+              <p><span class="text-brand">&gt; suporte</span>: TÉCNICO ALOCADO EM FORTALEZA/CE</p>
+            </div>
+
+            <!-- Terminal Code Snippet Block -->
+            <div class="mt-4 rounded bg-slate-900/90 p-4 border border-brand/20 text-slate-300">
+              <p class="text-slate-500">// Compromisso TecnoservTech</p>
+              <p class="text-brand font-semibold">function garantirSuaEmpresaRodando() {</p>
+              <p class="pl-4 text-emerald-400">seguranca = true;</p>
+              <p class="pl-4 text-emerald-400">tempoDeInatividade = 0;</p>
+              <p class="pl-4 text-emerald-400">atendimentoHumano = true;</p>
+              <p class="text-brand">}</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contato" class="mx-auto max-w-6xl px-4 sm:px-6 py-20">
+      <div class="grid gap-8 lg:grid-cols-2">
+        
+        <!-- Contact Details -->
+        <div class="glass rounded-2xl border border-brand/20 p-8 shadow-xl flex flex-col justify-between">
+          <div>
+            <span class="text-xs font-mono text-brand uppercase tracking-widest">// Atendimento imediato</span>
+            <h2 class="mt-2 font-display text-3xl font-bold text-white">
+              <span class="text-brand">&gt;</span> Fale com a gente
+            </h2>
+            <p class="mt-3 text-sm text-slate-300">
+              Escolha o canal de sua preferência. Atendemos empresas em toda Fortaleza e Região Metropolitana.
+            </p>
+
+            <!-- Channels list -->
+            <div class="mt-8 space-y-4">
+              
+              <!-- WhatsApp Card -->
+              <a href="https://wa.me/5585988649731" target="_blank" rel="noreferrer" class="glass-strong group flex items-center gap-4 rounded-xl border border-brand/20 p-4 transition-all hover:border-emerald-500/50 hover:bg-emerald-500/5">
+                <div class="grid h-12 w-12 place-items-center rounded-lg bg-emerald-500/20 text-emerald-400 font-bold group-hover:bg-emerald-500 group-hover:text-black transition-colors">
+                  <svg class="w-6 h-6 fill-current" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.705 1.754zm6.097-4.137l.437.26c1.558.925 3.344 1.413 5.176 1.414 5.44 0 9.866-4.426 9.868-9.868.001-2.636-1.025-5.112-2.899-6.988-1.874-1.874-4.35-2.899-6.988-2.899-5.441 0-9.868 4.426-9.868 9.868 0 1.91.545 3.76 1.577 5.367l.285.444-1.042 3.809 3.905-1.023z"/></svg>
+                </div>
+                <div>
+                  <p class="text-xs font-mono uppercase tracking-wider text-slate-400">WhatsApp Direto</p>
+                  <p class="font-mono text-lg font-bold text-white group-hover:text-emerald-400 transition-colors">(85) 98864-9731</p>
+                </div>
+              </a>
+
+              <!-- Email Card -->
+              <a href="mailto:juliocesarvieirarocha@gmail.com" class="glass-strong group flex items-center gap-4 rounded-xl border border-brand/20 p-4 transition-all hover:border-brand/50 hover:bg-brand/5">
+                <div class="grid h-12 w-12 place-items-center rounded-lg bg-brand/20 text-brand font-bold group-hover:bg-brand group-hover:text-black transition-colors">
+                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                </div>
+                <div class="overflow-hidden">
+                  <p class="text-xs font-mono uppercase tracking-wider text-slate-400">E-mail Comercial</p>
+                  <p class="font-mono text-sm sm:text-base font-bold text-white truncate group-hover:text-brand transition-colors">juliocesarvieirarocha@gmail.com</p>
+                </div>
+              </a>
+
+            </div>
+          </div>
+
+          <div class="mt-8 pt-6 border-t border-slate-800 text-xs font-mono text-slate-400">
+            <p>📍 Fortaleza, Ceará — Atendimento presencial e remoto</p>
+          </div>
+        </div>
+
+        <!-- Interactive Contact Form -->
+        <div class="glass rounded-2xl border border-brand/20 p-8 shadow-xl">
+          <h3 class="font-display text-xl font-bold text-white">
+            <span class="text-brand">$</span> Envie sua mensagem
+          </h3>
+          <p class="text-xs text-slate-400 mt-1 font-mono">Preencha os campos abaixo e entraremos em contato.</p>
+
+          <form id="contactForm" class="mt-6 space-y-4">
+            <div>
+              <label class="block text-xs font-mono text-slate-300 mb-1" for="form-name">&gt; Nome completo / Empresa</label>
+              <input id="form-name" type="text" required placeholder="Ex: João Silva (Empresa XYZ)" class="w-full rounded-lg border border-brand/25 bg-slate-950/80 px-4 py-3 text-sm text-white placeholder-slate-500 outline-none transition-all focus:border-brand focus:ring-1 focus:ring-brand" />
+            </div>
+
+            <div>
+              <label class="block text-xs font-mono text-slate-300 mb-1" for="form-contact">&gt; E-mail ou Telefone com DDD</label>
+              <input id="form-contact" type="text" required placeholder="Ex: contato@suaempresa.com.br ou (85) 9..." class="w-full rounded-lg border border-brand/25 bg-slate-950/80 px-4 py-3 text-sm text-white placeholder-slate-500 outline-none transition-all focus:border-brand focus:ring-1 focus:ring-brand" />
+            </div>
+
+            <div>
+              <label class="block text-xs font-mono text-slate-300 mb-1" for="form-message">&gt; Como podemos ajudar?</label>
+              <textarea id="form-message" rows="4" required placeholder="Descreva sua necessidade (Rede, Firewall, Servidores, Backup, Suporte...)" class="w-full resize-none rounded-lg border border-brand/25 bg-slate-950/80 px-4 py-3 text-sm text-white placeholder-slate-500 outline-none transition-all focus:border-brand focus:ring-1 focus:ring-brand"></textarea>
+            </div>
+
+            <button type="submit" id="submitBtn" class="w-full rounded-lg bg-brand px-6 py-3.5 font-mono text-sm font-bold text-black shadow-neon transition-all hover:bg-cyan-300 hover:scale-[1.01] active:scale-[0.99] flex justify-center items-center gap-2">
+              <span>Enviar mensagem</span>
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+            </button>
+
+            <!-- Form Feedback Status -->
+            <div id="formStatus" class="hidden rounded-lg p-3 text-xs font-mono border"></div>
+          </form>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="mt-auto border-t border-brand/20 glass-strong">
+      <div class="mx-auto max-w-6xl px-4 sm:px-6 py-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-mono text-slate-400">
+        <p>© 2026 TecnoservTech · Fortaleza, CE. Todos os direitos reservados.</p>
+        <p><span class="text-brand">$</span> Serviços de TI de Alta Performance para PMEs</p>
+      </div>
+    </footer>
+
   </div>
 
-  <!-- Footer -->
-  <footer class="border-t border-brand/20 glass py-6 text-center text-xs text-white/50">
-    © 2026 Tecnoservtech · Fortaleza, CE
-  </footer>
-
-  <!-- Scripts -->
+  <!-- JavaScript for Matrix/Node Background & Form Handler -->
   <script>
-    function filterCards(type) {
-      const items = document.querySelectorAll('.card-item');
-      items.forEach(item => {
-        if (type === 'all' || item.classList.contains(type)) {
-          item.style.display = 'block';
-        } else {
-          item.style.display = 'none';
+    /* -------------------------------------------------------------
+       1. Dynamic Matrix/Node Background Canvas Animation
+       ------------------------------------------------------------- */
+    const canvas = document.getElementById('bg-canvas');
+    const ctx = canvas.getContext('2d');
+
+    let width, height;
+    let particles = [];
+
+    function resizeCanvas() {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+    }
+
+    class Particle {
+      constructor() {
+        this.reset();
+      }
+
+      reset() {
+        this.x = Math.random() * width;
+        this.y = Math.random() * height;
+        this.vx = (Math.random() - 0.5) * 0.4;
+        this.vy = (Math.random() - 0.5) * 0.4;
+        this.radius = Math.random() * 1.5 + 1;
+        this.alpha = Math.random() * 0.5 + 0.2;
+      }
+
+      update() {
+        this.x += this.vx;
+        this.y += this.vy;
+
+        if (this.x < 0 || this.x > width) this.vx *= -1;
+        if (this.y < 0 || this.y > height) this.vy *= -1;
+      }
+
+      draw() {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(0, 240, 255, ${this.alpha})`;
+        ctx.fill();
+      }
+    }
+
+    function initParticles() {
+      resizeCanvas();
+      particles = [];
+      const count = Math.min(Math.floor((width * height) / 12000), 70);
+      for (let i = 0; i < count; i++) {
+        particles.push(new Particle());
+      }
+    }
+
+    function animateParticles() {
+      ctx.clearRect(0, 0, width, height);
+
+      // Draw particle connections
+      for (let i = 0; i < particles.length; i++) {
+        particles[i].update();
+        particles[i].draw();
+
+        for (let j = i + 1; j < particles.length; j++) {
+          const dx = particles[i].x - particles[j].x;
+          const dy = particles[i].y - particles[j].y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+
+          if (dist < 120) {
+            ctx.beginPath();
+            ctx.moveTo(particles[i].x, particles[i].y);
+            ctx.lineTo(particles[j].x, particles[j].y);
+            ctx.strokeStyle = `rgba(0, 240, 255, ${0.15 * (1 - dist / 120)})`;
+            ctx.lineWidth = 0.8;
+            ctx.stroke();
+          }
         }
-      });
+      }
+
+      requestAnimationFrame(animateParticles);
     }
 
-    function openModal(title, body) {
-      document.getElementById('modal-title').innerText = title;
-      document.getElementById('modal-body').innerText = body;
-      document.getElementById('modal').classList.remove('hidden');
-    }
+    window.addEventListener('resize', initParticles);
 
-    function closeModal() {
-      document.getElementById('modal').classList.add('hidden');
-    }
+    /* -------------------------------------------------------------
+       2. Interactive Contact Form Handler (Direct & Feedback)
+       ------------------------------------------------------------- */
+    const contactForm = document.getElementById('contactForm');
+    const formStatus = document.getElementById('formStatus');
+    const submitBtn = document.getElementById('submitBtn');
 
-    document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape') closeModal();
+    contactForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const name = document.getElementById('form-name').value.trim();
+      const contact = document.getElementById('form-contact').value.trim();
+      const message = document.getElementById('form-message').value.trim();
+
+      // Show submitting state
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = `<span>Processando...</span>`;
+
+      setTimeout(() => {
+        // Clear inputs
+        contactForm.reset();
+        
+        // Show success status UI
+        formStatus.classList.remove('hidden', 'bg-red-500/10', 'border-red-500/30', 'text-red-400');
+        formStatus.classList.add('bg-emerald-500/10', 'border-emerald-500/30', 'text-emerald-400');
+        formStatus.innerHTML = `
+          📌 <strong>Mensagem enviada com sucesso!</strong><br/>
+          Obrigado, ${name}. Nossa equipe retornará seu contato em breve.
+        `;
+
+        // Restore button state
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = `
+          <span>Enviar mensagem</span>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+        `;
+
+        // Optionally open WhatsApp prefilled
+        const waText = encodeURIComponent(`Olá, me chamo ${name}. Minha dúvida/pedido: ${message} (Contato: ${contact})`);
+        const confirmWhatsApp = confirm("Deseja também abrir a conversa diretamente no WhatsApp?");
+        if (confirmWhatsApp) {
+          window.open(`https://wa.me/5585988649731?text=${waText}`, '_blank');
+        }
+
+      }, 1000);
     });
-  </script>
 
+    /* -------------------------------------------------------------
+       Start loop on page load
+       ------------------------------------------------------------- */
+    window.onload = function() {
+      initParticles();
+      animateParticles();
+    };
+  </script>
 </body>
 </html>
